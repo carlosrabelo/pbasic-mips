@@ -8,7 +8,7 @@
 - [x] The heart of the system: Basic REPL loop (Read-Eval-Print Loop) prompt `>`
 
 ## Phase 2: Lexical Analysis (Tokenizer)
-- [ ] Implement the `TOKENIZE` engine to convert ASCII input into internal 1-byte tokens
+- [x] Implement the `TOKENIZE` engine to convert ASCII input into internal 1-byte tokens
 - [ ] Recognize keywords via `MATCH_KEYWORD` (LET, PRINT, IF, GOTO, etc.)
 - [ ] Parse decimal ASCII numbers into 16-bit little-endian format (token 0xC0)
 - [ ] Classify string literals (token 0xC1) and single-letter variables (A-Z)
