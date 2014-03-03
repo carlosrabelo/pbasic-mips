@@ -5,7 +5,7 @@
 - [x] Base I/O routines: `INCHAR`, `OUTCHAR` (SPIM syscalls 11 and 12)
 - [x] String and number output: `PRINT_STR`, `PRINT_NUMBER`, `PRINT_CRLF` (SPIM syscalls 4 and 1)
 - [x] Read input buffer: `READ_LINE` (with uppercase conversion)
-- [ ] The heart of the system: Basic REPL loop (Read-Eval-Print Loop) prompt `>`
+- [x] The heart of the system: Basic REPL loop (Read-Eval-Print Loop) prompt `>`
 
 ## Phase 2: Lexical Analysis (Tokenizer)
 - [ ] Implement the `TOKENIZE` engine to convert ASCII input into internal 1-byte tokens

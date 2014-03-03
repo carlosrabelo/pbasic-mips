@@ -41,8 +41,21 @@
 main:
     # SPIM and MARS initialize $sp on startup (MARS: 0x7FFFEFFC).
     # No manual stack initialization is required.
+    jal     REPL
+    j       HALT_LOOP
+
+HALT_LOOP:
     addiu   $v0, $zero, 10
     syscall
+
+# -----------------------------------------------------------------------
+# REPL - Read-Eval-Print Loop (prompt + read; tokenize/dispatch come later)
+# -----------------------------------------------------------------------
+REPL:
+    la      $a0, STR_PROMPT
+    jal     PRINT_STR
+    jal     READ_LINE
+    j       REPL
 
 # -----------------------------------------------------------------------
 # INCHAR - Read a single character (syscall 12)
