@@ -59,3 +59,22 @@ OUTCHAR:
     li      $v0, 11
     syscall
     jr      $ra
+
+# -----------------------------------------------------------------------
+# PRINT_STR / PRINT_NUMBER / PRINT_CRLF
+# -----------------------------------------------------------------------
+PRINT_STR:
+    li      $v0, 4
+    syscall
+    jr      $ra
+
+PRINT_NUMBER:
+    li      $v0, 1
+    syscall
+    jr      $ra
+
+PRINT_CRLF:
+    la      $a0, STR_CRLF
+    li      $v0, 4
+    syscall
+    jr      $ra
