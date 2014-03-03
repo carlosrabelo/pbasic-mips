@@ -43,3 +43,19 @@ main:
     # No manual stack initialization is required.
     addiu   $v0, $zero, 10
     syscall
+
+# -----------------------------------------------------------------------
+# INCHAR - Read a single character (syscall 12)
+# -----------------------------------------------------------------------
+INCHAR:
+    li      $v0, 12
+    syscall
+    jr      $ra
+
+# -----------------------------------------------------------------------
+# OUTCHAR - Print a single character (syscall 11)
+# -----------------------------------------------------------------------
+OUTCHAR:
+    li      $v0, 11
+    syscall
+    jr      $ra
