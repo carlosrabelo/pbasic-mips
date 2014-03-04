@@ -78,3 +78,53 @@ PRINT_CRLF:
     li      $v0, 4
     syscall
     jr      $ra
+
+# -----------------------------------------------------------------------
+# READ_LINE - Read a line, strip CR/LF, uppercase a-z
+# -----------------------------------------------------------------------
+READ_LINE:
+    addiu   $sp, $sp, -4
+    sw      $ra, 0($sp)
+
+    la      $a0, MEM_INPUT_BUF
+    li      $a1, 127
+    li      $v0, 8
+    syscall
+
+    la      $t0, MEM_INPUT_BUF
+    lbu     $t1, 0($t0)
+    beqz    $t1, READ_LINE_EOF
+
+READ_LINE_LOOP:
+    lbu     $t1, 0($t0)
+    beqz    $t1, READ_LINE_DONE
+    li      $t2, 10
+    beq     $t1, $t2, RL_TRUNCATE
+    li      $t2, 13
+    beq     $t1, $t2, RL_TRUNCATE
+    li      $v0, 97
+    slt     $a1, $t1, $v0
+    bne     $a1, $zero, READ_LINE_NEXT
+    li      $v0, 122
+    slt     $a1, $v0, $t1
+    bne     $a1, $zero, READ_LINE_NEXT
+    addiu   $t1, $t1, -32
+    sb      $t1, 0($t0)
+
+READ_LINE_NEXT:
+    addiu   $t0, $t0, 1
+    j       READ_LINE_LOOP
+
+RL_TRUNCATE:
+    sb      $zero, 0($t0)
+
+READ_LINE_DONE:
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 4
+    jr      $ra
+
+READ_LINE_EOF:
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 4
+    li      $v0, 10
+    syscall
