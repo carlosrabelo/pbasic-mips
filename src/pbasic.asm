@@ -723,3 +723,41 @@ PKW_DONE:
     lw      $ra, 12($sp)
     addiu   $sp, $sp, 16
     jr      $ra
+
+# LINE_FIND
+# -----------------------------------------------------------------------
+# Description: Finds line by number.
+# Input: $a0 = target line number (16-bit)
+# Output: $v0 = 1 if found exactly, 0 if not
+#         $v1 = pointer to node or insertion point
+# -----------------------------------------------------------------------
+LINE_FIND:
+    la      $t0, MEM_PROG_START
+    
+LF_LOOP:
+    lw      $t1, 0($t0)             # Read next_ptr
+    beqz    $t1, LF_MISS            # End of list -> insertion point is here
+    
+    # Read line number (16-bit little-endian)
+    lbu     $t2, 4($t0)             # low byte
+    lbu     $t3, 5($t0)             # high byte
+    sll     $t3, $t3, 8
+    or      $t2, $t2, $t3           # $t2 = node line number
+    
+    beq     $t2, $a0, LF_HIT
+    bgt     $t2, $a0, LF_MISS       # Passed it -> insertion point is here
+    
+    move    $t0, $t1
+    j       LF_LOOP
+    
+LF_HIT:
+    li      $v0, 1
+    move    $v1, $t0
+    jr      $ra
+    
+LF_MISS:
+    li      $v0, 0
+    move    $v1, $t0
+    jr      $ra
+
+# -----------------------------------------------------------------------
