@@ -138,8 +138,13 @@ REPL:
     sw      $t0, 0($t1)
     lbu     $t1, 0($t0)
     addiu   $t2, $zero, 192
-    bne     $t1, $t2, REPL
+    bne     $t1, $t2, REPL_NOT_LINE
     jal     LINE_STORE
+    j       REPL
+REPL_NOT_LINE:
+    addiu   $t2, $zero, 136
+    bne     $t1, $t2, REPL
+    jal     CMD_LIST
     j       REPL
 
 # -----------------------------------------------------------------------
@@ -1164,3 +1169,44 @@ LS_DONE:
     jr      $ra
 
 # -----------------------------------------------------------------------
+
+# CMD_LIST
+# -----------------------------------------------------------------------
+# Description: Prints all tokenized BASIC lines to the screen.
+# -----------------------------------------------------------------------
+CMD_LIST:
+    addiu   $sp, $sp, -16
+    sw      $ra, 12($sp)
+    sw      $s0, 8($sp)
+    
+    la      $s0, MEM_PROG_START
+    
+LSL_LOOP:
+    lw      $t0, 0($s0)
+    beqz    $t0, LSL_DONE           # Stop if next_ptr is null
+    
+    # Read line number
+    lbu     $t1, 4($s0)
+    lbu     $t2, 5($s0)
+    sll     $t2, $t2, 8
+    or      $a0, $t1, $t2
+    jal     PRINT_NUMBER
+    
+    # Print space separator
+    li      $a0, 32
+    jal     OUTCHAR
+    
+    # Print tokens (starts at offset 6)
+    addiu   $a0, $s0, 6
+    jal     PRINT_TOKENS
+    jal     PRINT_CRLF
+    
+    # Move to next node
+    lw      $s0, 0($s0)
+    j       LSL_LOOP
+    
+LSL_DONE:
+    lw      $s0, 8($sp)
+    lw      $ra, 12($sp)
+    addiu   $sp, $sp, 16
+    jr      $ra
