@@ -99,8 +99,27 @@ PKW_TABLE:
 main:
     # SPIM and MARS initialize $sp on startup (MARS: 0x7FFFEFFC).
     # No manual stack initialization is required.
+    jal     PROG_INIT
     jal     REPL
     j       HALT_LOOP
+
+# -----------------------------------------------------------------------
+# PROG_INIT - Sentinel + 52 KB limit word
+# -----------------------------------------------------------------------
+PROG_INIT:
+    la      $t0, MEM_PROG_START
+    addiu   $t1, $zero, 16384
+    addiu   $t1, $t1, 16384
+    addiu   $t1, $t1, 16384
+    addiu   $t1, $t1, 4096
+    addu    $t1, $t0, $t1
+    la      $t2, MEM_PROG_LIMIT
+    sw      $t1, 0($t2)
+    sw      $zero, 0($t0)
+    addiu   $t0, $t0, 4
+    la      $t2, MEM_PROG_END
+    sw      $t0, 0($t2)
+    jr      $ra
 
 HALT_LOOP:
     addiu   $v0, $zero, 10
