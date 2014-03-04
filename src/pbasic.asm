@@ -55,7 +55,70 @@ REPL:
     la      $a0, STR_PROMPT
     jal     PRINT_STR
     jal     READ_LINE
+    jal     TOKENIZE
     j       REPL
+
+# -----------------------------------------------------------------------
+# TOKENIZE - Convert MEM_INPUT_BUF to tokens in MEM_TOKEN_BUF
+# -----------------------------------------------------------------------
+TOKENIZE:
+    la      $t0, MEM_INPUT_BUF
+    la      $t1, MEM_TOKEN_BUF
+
+TOK_LOOP:
+TOK_SKIP_SPACES:
+    lb      $t2, 0($t0)
+    li      $t3, 32
+    bne     $t2, $t3, TOK_CHECK_CHAR
+    addiu   $t0, $t0, 1
+    j       TOK_SKIP_SPACES
+
+TOK_CHECK_CHAR:
+    lb      $t2, 0($t0)
+    beqz    $t2, TOK_DONE
+    li      $t3, 34
+    beq     $t2, $t3, TOK_STRING
+    li      $t3, 48
+    slt     $t3, $t2, $t3
+    bnez    $t3, TOK_NOTNUM
+    li      $t3, 57
+    slt     $t3, $t3, $t2
+    bnez    $t3, TOK_NOTNUM
+    j       TOK_NUMBER
+
+TOK_NOTNUM:
+    li      $t3, 65
+    slt     $t3, $t2, $t3
+    bnez    $t3, TOK_NOTLETTER
+    li      $t3, 90
+    slt     $t3, $t3, $t2
+    bnez    $t3, TOK_NOTLETTER
+    j       TOK_LETTER
+
+TOK_NOTLETTER:
+    sb      $t2, 0($t1)
+    addiu   $t0, $t0, 1
+    addiu   $t1, $t1, 1
+    j       TOK_LOOP
+
+TOK_DONE:
+    sb      $zero, 0($t1)
+    jr      $ra
+
+# Stubs until later tokenizer checkboxes
+TOK_NUMBER:
+    addiu   $t0, $t0, 1
+    j       TOK_LOOP
+
+TOK_STRING:
+    addiu   $t0, $t0, 1
+    j       TOK_LOOP
+
+TOK_LETTER:
+    sb      $t2, 0($t1)
+    addiu   $t0, $t0, 1
+    addiu   $t1, $t1, 1
+    j       TOK_LOOP
 
 # -----------------------------------------------------------------------
 # INCHAR - Read a single character (syscall 12)
