@@ -189,6 +189,24 @@ PN_FAIL:
 
 TOK_STRING:
     addiu   $t0, $t0, 1
+    li      $t3, 0xC1
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
+TS_LOOP:
+    lb      $t2, 0($t0)
+    beqz    $t2, TS_END
+    li      $t3, 34
+    beq     $t2, $t3, TS_CLOSE
+    sb      $t2, 0($t1)
+    addiu   $t0, $t0, 1
+    addiu   $t1, $t1, 1
+    j       TS_LOOP
+TS_CLOSE:
+    addiu   $t0, $t0, 1
+TS_END:
+    li      $t3, 0xC1
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
     j       TOK_LOOP
 
 TOK_LETTER:
@@ -271,6 +289,8 @@ TOK_LETTER:
     lw      $ra, 12($sp)
     addiu   $sp, $sp, 16
     lb      $t2, 0($t0)
+    addiu   $t2, $t2, -65
+    addiu   $t2, $t2, 0xD0
     sb      $t2, 0($t1)
     addiu   $t0, $t0, 1
     addiu   $t1, $t1, 1
