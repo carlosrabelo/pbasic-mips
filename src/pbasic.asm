@@ -1640,8 +1640,7 @@ DO_LIST:
 DO_RUN:
 # DO_NEW is provided by the NEW command checkbox.
 DO_EXIT:
-DO_REM:
-    j       REPL
+# DO_REM is provided by the REM command checkbox.
 DO_FREE:
     j       REPL
 
@@ -1849,4 +1848,17 @@ DO_NEW:
 
     lw      $ra, 0($sp)
     addiu   $sp, $sp, 4
+    j       REPL
+# cmd_rem.asm - REM command execution (MIPS)
+# -----------------------------------------------------------------------
+
+.text
+
+# -----------------------------------------------------------------------
+# DO_REM - Handles comments (REMarks) by ignoring the rest of the line
+# Input:  None
+# Output: None
+# Clobbers: None
+# -----------------------------------------------------------------------
+DO_REM:
     j       REPL
