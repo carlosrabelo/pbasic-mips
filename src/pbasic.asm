@@ -1252,3 +1252,9 @@ VAR_SET:
     addu    $t1, $t1, $t0
     sw      $a1, 0($t1)
     jr      $ra
+
+MUL16:
+    mult    $a0, $a1
+    mflo    $v0
+    andi    $v0, $v0, 0xFFFF
+    jr      $ra
