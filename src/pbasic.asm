@@ -129,8 +129,63 @@ TOK_DONE:
 
 # Stubs until later tokenizer checkboxes
 TOK_NUMBER:
-    addiu   $t0, $t0, 1
+    li      $t3, 0xC0
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
+    move    $a0, $t0
+    addiu   $sp, $sp, -16
+    sw      $ra, 12($sp)
+    sw      $t0, 8($sp)
+    sw      $t1, 4($sp)
+    jal     PARSE_NUMBER
+    lw      $t1, 4($sp)
+    lw      $t0, 8($sp)
+    lw      $ra, 12($sp)
+    addiu   $sp, $sp, 16
+    move    $t0, $v1
+    andi    $t3, $v0, 0xFF
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
+    srl     $t3, $v0, 8
+    andi    $t3, $t3, 0xFF
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
     j       TOK_LOOP
+
+# -----------------------------------------------------------------------
+# PARSE_NUMBER - Decimal ASCII at $a0 -> $v0, advanced ptr in $v1
+# -----------------------------------------------------------------------
+PARSE_NUMBER:
+    move    $t0, $a0
+    li      $v0, 0
+    move    $v1, $a0
+    lb      $t1, 0($t0)
+    li      $t2, 48
+    slt     $t3, $t1, $t2
+    bne     $t3, $zero, PN_FAIL
+    li      $t2, 57
+    slt     $t3, $t2, $t1
+    bne     $t3, $zero, PN_FAIL
+PN_LOOP:
+    lb      $t1, 0($t0)
+    li      $t2, 48
+    slt     $t3, $t1, $t2
+    bne     $t3, $zero, PN_DONE
+    li      $t2, 57
+    slt     $t3, $t2, $t1
+    bne     $t3, $zero, PN_DONE
+    addiu   $t1, $t1, -48
+    li      $t3, 10
+    mult    $v0, $t3
+    mflo    $v0
+    addu    $v0, $v0, $t1
+    addiu   $t0, $t0, 1
+    j       PN_LOOP
+PN_DONE:
+    move    $v1, $t0
+    jr      $ra
+PN_FAIL:
+    jr      $ra
 
 TOK_STRING:
     addiu   $t0, $t0, 1
