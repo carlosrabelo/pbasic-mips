@@ -39,7 +39,7 @@
 - [x] `LET`: Assign evaluated expressions to variables
 - [x] `NEW`: Clear the program linked list and variables
 - [x] `REM`: Ignore the remainder of the line
-- [ ] `FREE`: Available bytes between `MEM_PROG_END` and `MEM_PROG_LIMIT` (command or expression)
+- [x] `FREE`: Available bytes between `MEM_PROG_END` and `MEM_PROG_LIMIT` (command or expression)
 
 ## Phase 7: Control Flow
 - [ ] `RUN`: Traverse the linked list and dispatch tokens sequentially
