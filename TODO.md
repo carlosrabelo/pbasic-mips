@@ -9,7 +9,7 @@
 
 ## Phase 2: Lexical Analysis (Tokenizer)
 - [x] Implement the `TOKENIZE` engine to convert ASCII input into internal 1-byte tokens
-- [ ] Recognize keywords via `MATCH_KEYWORD` (LET, PRINT, IF, GOTO, etc.)
+- [x] Recognize keywords via `MATCH_KEYWORD` (LET, PRINT, IF, GOTO, etc.)
 - [ ] Parse decimal ASCII numbers into 16-bit little-endian format (token 0xC0)
 - [ ] Classify string literals (token 0xC1) and single-letter variables (A-Z)
 - [ ] Detokenizer routines (`PRINT_TOKENS`) to revert tokens back to text
