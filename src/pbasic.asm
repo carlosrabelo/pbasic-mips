@@ -186,8 +186,51 @@ TOK_NOTNUM:
     j       TOK_LETTER
 
 TOK_NOTLETTER:
+    li      $t3, 60
+    beq     $t2, $t3, TOK_LT
+    li      $t3, 62
+    beq     $t2, $t3, TOK_GT
     sb      $t2, 0($t1)
     addiu   $t0, $t0, 1
+    addiu   $t1, $t1, 1
+    j       TOK_LOOP
+
+TOK_LT:
+    addiu   $t0, $t0, 1
+    lb      $t2, 0($t0)
+    li      $t3, 62
+    beq     $t2, $t3, TOK_NE
+    li      $t3, 61
+    beq     $t2, $t3, TOK_LE
+    li      $t3, 60
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
+    j       TOK_LOOP
+TOK_NE:
+    addiu   $t0, $t0, 1
+    li      $t3, 0xB0
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
+    j       TOK_LOOP
+TOK_LE:
+    addiu   $t0, $t0, 1
+    li      $t3, 0xB1
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
+    j       TOK_LOOP
+TOK_GT:
+    addiu   $t0, $t0, 1
+    lb      $t2, 0($t0)
+    li      $t3, 61
+    beq     $t2, $t3, TOK_GE
+    li      $t3, 62
+    sb      $t3, 0($t1)
+    addiu   $t1, $t1, 1
+    j       TOK_LOOP
+TOK_GE:
+    addiu   $t0, $t0, 1
+    li      $t3, 0xB2
+    sb      $t3, 0($t1)
     addiu   $t1, $t1, 1
     j       TOK_LOOP
 
@@ -1409,6 +1452,98 @@ EF_NOT_PAREN:
 EF_ERR:
     addu    $v0, $zero, $zero
 EF_DONE:
+    lw      $s1, 12($sp)
+    lw      $s0, 16($sp)
+    lw      $ra, 20($sp)
+    addiu   $sp, $sp, 24
+    jr      $ra
+    sw      $ra, 20($sp)
+    sw      $s0, 16($sp)
+    sw      $s1, 12($sp)
+    sw      $s2, 8($sp)
+
+    jal     EVAL_EXPR           # Evaluate left side expression, result in $v0
+    addu    $s0, $v0, $zero     # $s0 = left side result
+
+    la      $t0, MEM_TOKEN_PTR
+    lw      $t0, 0($t0)         # Load token pointer
+    lbu     $s1, 0($t0)         # $s1 = operator token
+    
+    addiu   $t0, $t0, 1         # Advance past operator
+    la      $t1, MEM_TOKEN_PTR
+    sw      $t0, 0($t1)
+
+    jal     EVAL_EXPR           # Evaluate right side expression, result in $v0
+    addu    $s2, $v0, $zero     # $s2 = right side result
+
+    # Compare 32-bit two's complement (unary minus and FREE stay full-width)
+
+    # Let's perform comparisons based on $s1 (operator token)
+    
+    # 1) '=' (0x3D = 61)
+    addiu   $t0, $zero, 61
+    beq     $s1, $t0, EC_EQ
+
+    # 2) '<>' (0xB0 = 176)
+    addiu   $t0, $zero, 176
+    beq     $s1, $t0, EC_NE
+
+    # 3) '<' (0x3C = 60)
+    addiu   $t0, $zero, 60
+    beq     $s1, $t0, EC_LT
+
+    # 4) '>' (0x3E = 62)
+    addiu   $t0, $zero, 62
+    beq     $s1, $t0, EC_GT
+
+    # 5) '<=' (0xB1 = 177)
+    addiu   $t0, $zero, 177
+    beq     $s1, $t0, EC_LE
+
+    # 6) '>=' (0xB2 = 178)
+    addiu   $t0, $zero, 178
+    beq     $s1, $t0, EC_GE
+
+    # Unknown operator, return 0 (false)
+    j       EC_FALSE
+
+EC_EQ:
+    beq     $s0, $s2, EC_TRUE
+    j       EC_FALSE
+
+EC_NE:
+    bne     $s0, $s2, EC_TRUE
+    j       EC_FALSE
+
+EC_LT:
+    slt     $t0, $s0, $s2
+    bne     $t0, $zero, EC_TRUE
+    j       EC_FALSE
+
+EC_GT:
+    slt     $t0, $s2, $s0
+    bne     $t0, $zero, EC_TRUE
+    j       EC_FALSE
+
+EC_LE:
+    slt     $t0, $s2, $s0
+    beq     $t0, $zero, EC_TRUE
+    j       EC_FALSE
+
+EC_GE:
+    slt     $t0, $s0, $s2
+    beq     $t0, $zero, EC_TRUE
+    j       EC_FALSE
+
+EC_TRUE:
+    addiu   $v0, $zero, 1       # Return 1
+    j       EC_DONE
+
+EC_FALSE:
+    addu    $v0, $zero, $zero   # Return 0
+
+EC_DONE:
+    lw      $s2, 8($sp)
     lw      $s1, 12($sp)
     lw      $s0, 16($sp)
     lw      $ra, 20($sp)

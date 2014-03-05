@@ -31,7 +31,7 @@
 - [x] `EVAL_FACTOR`: Handle numeric literals, variables, parentheses, and unary minus
 - [x] `EVAL_TERM`: Multiplication and division (`*`, `/`)
 - [x] `EVAL_EXPR`: Addition and subtraction (`+`, `-`) as 32-bit two's complement (so `PRINT FREE` and `PRINT -15` both work) as 32-bit two's complement (so `PRINT FREE` and `PRINT -15` both work)
-- [ ] `EVAL_COND`: Boolean comparisons (`=`, `<>`, `<`, `>`, `<=`, `>=`)
+- [x] `EVAL_COND`: Boolean comparisons (`=`, `<>`, `<`, `>`, `<=`, `>=`)
 
 ## Phase 6: Core Execution Engine
 - [ ] Direct command jump table: `REPL_DISPATCH`
