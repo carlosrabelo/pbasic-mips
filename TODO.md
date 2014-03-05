@@ -34,7 +34,7 @@
 - [x] `EVAL_COND`: Boolean comparisons (`=`, `<>`, `<`, `>`, `<=`, `>=`)
 
 ## Phase 6: Core Execution Engine
-- [ ] Direct command jump table: `REPL_DISPATCH`
+- [x] Direct command jump table: `REPL_DISPATCH`
 - [ ] `PRINT`: Output expressions, string literals, handling `,` (tabs) and `;` (no newline)
 - [ ] `LET`: Assign evaluated expressions to variables
 - [ ] `NEW`: Clear the program linked list and variables
