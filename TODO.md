@@ -49,7 +49,7 @@
 - [x] `IF / THEN`: Conditional branching (THEN must be followed by a command)
 
 ## Phase 8: Advanced Functions & Interactivity
-- [ ] `INPUT`: Pause execution, read from TTY, and assign to a variable (`INPUT VAR` or `INPUT "prompt"; VAR`)
+- [x] `INPUT`: Pause execution, read from TTY, and assign to a variable (`INPUT VAR` or `INPUT "prompt"; VAR`)
 - [ ] `RND(x)`: Linear congruential generator; returns 1..x (or a raw 16-bit value when x is 0)
 - [ ] `ABS(x)`: 16-bit two's-complement absolute value
 
