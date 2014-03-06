@@ -45,7 +45,7 @@
 - [x] `RUN`: Traverse the linked list and dispatch tokens sequentially
 - [x] `END` and `EXIT`: Halt execution cleanly
 - [x] `GOTO`: Unconditional jump by updating the line pointer
-- [ ] `GOSUB` and `RETURN`: Subroutine calls using an internal call stack
+- [x] `GOSUB` and `RETURN`: Subroutine calls using an internal call stack
 - [ ] `IF / THEN`: Conditional branching (THEN must be followed by a command)
 
 ## Phase 8: Advanced Functions & Interactivity
