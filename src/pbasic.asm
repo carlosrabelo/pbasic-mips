@@ -1643,8 +1643,7 @@ DO_GOSUB:
 DO_IF:
 DO_INPUT:
 DO_RETURN:
-DO_END:
-    j       REPL
+# DO_END is provided by the END command checkbox.
 DO_LIST:
     addiu   $sp, $sp, -4
     sw      $ra, 0($sp)
@@ -1654,7 +1653,7 @@ DO_LIST:
     j       REPL
 # DO_RUN is provided by the RUN command checkbox.
 # DO_NEW is provided by the NEW command checkbox.
-DO_EXIT:
+# DO_EXIT is provided by the EXIT command checkbox.
 # DO_REM is provided by the REM command checkbox.
 # DO_FREE is provided by the FREE command checkbox.
 
@@ -2047,3 +2046,30 @@ RUN_NO_PROG:
     lw      $ra, 0($sp)
     addiu   $sp, $sp, 4
     j       REPL
+# cmd_end.asm - END command execution (MIPS)
+# -----------------------------------------------------------------------
+
+.text
+
+# -----------------------------------------------------------------------
+# DO_END - Resets run flag to stop program execution
+# Input:  None
+# Output: None
+# Clobbers: None
+# -----------------------------------------------------------------------
+DO_END:
+    j       RUN_END
+# cmd_exit.asm - EXIT command execution (MIPS)
+# -----------------------------------------------------------------------
+
+.text
+
+# -----------------------------------------------------------------------
+# DO_EXIT - Gracefully exits the interpreter
+# Input:  None
+# Output: None
+# Clobbers: None
+# -----------------------------------------------------------------------
+DO_EXIT:
+    addiu   $v0, $zero, 10      # Exit syscall code
+    syscall
