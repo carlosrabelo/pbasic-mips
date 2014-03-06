@@ -1440,6 +1440,18 @@ EF_RND_ZERO:
     jal     RAND16
     j       EF_DONE
 EF_NOT_RND:
+    addiu   $t0, $zero, 162
+    bne     $s1, $t0, EF_NOT_ABS
+    addiu   $s0, $s0, 1
+    la      $t0, MEM_TOKEN_PTR
+    sw      $s0, 0($t0)
+    jal     EVAL_FACTOR
+    andi    $t0, $v0, 0x8000
+    beq     $t0, $zero, EF_DONE
+    nor     $v0, $v0, $zero
+    addiu   $v0, $v0, 1
+    j       EF_DONE
+EF_NOT_ABS:
     addiu   $t0, $zero, 208
     slt     $t1, $s1, $t0
     bne     $t1, $zero, EF_NOT_VAR
