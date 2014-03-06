@@ -1421,6 +1421,25 @@ EF_NOT_NUM:
     subu    $v0, $t0, $t1
     j       EF_DONE
 EF_NOT_FREE:
+    addiu   $t0, $zero, 161
+    bne     $s1, $t0, EF_NOT_RND
+    addiu   $s0, $s0, 1
+    la      $t0, MEM_TOKEN_PTR
+    sw      $s0, 0($t0)
+    jal     EVAL_FACTOR
+    beq     $v0, $zero, EF_RND_ZERO
+    addu    $s1, $v0, $zero
+    jal     RAND16
+    addu    $a0, $v0, $zero
+    addu    $a1, $s1, $zero
+    jal     MOD16
+    addiu   $v0, $v0, 1
+    andi    $v0, $v0, 0xFFFF
+    j       EF_DONE
+EF_RND_ZERO:
+    jal     RAND16
+    j       EF_DONE
+EF_NOT_RND:
     addiu   $t0, $zero, 208
     slt     $t1, $s1, $t0
     bne     $t1, $zero, EF_NOT_VAR
@@ -2412,3 +2431,20 @@ DIN_ERR:
     lw      $ra, 20($sp)
     addiu   $sp, $sp, 24
     j       REPL_SYNTAX_ERROR
+
+# RAND16 - Pseudo-random number generator (16-bit LCG).
+# Algorithm: seed = (seed * 5 + 2971) & 0xFFFF
+# Output: $v0 = new random number (16-bit)
+# Clobbers: $t0, $t1, $t2
+# -----------------------------------------------------------------------
+RAND16:
+    la      $t0, MEM_RAND_SEED  # Get address of the random seed
+    lw      $t1, 0($t0)         # Load seed
+    sll     $t2, $t1, 2         # $t2 = seed * 4
+    addu    $t1, $t2, $t1       # $t1 = seed * 5
+    addiu   $t1, $t1, 2971      # $t1 = seed * 5 + 2971
+    andi    $t1, $t1, 0xFFFF    # Mask to 16-bit
+    sw      $t1, 0($t0)         # Save new seed
+    addu    $v0, $t1, $zero     # Output in $v0
+    jr      $ra                 # Return to caller
+
