@@ -15,7 +15,7 @@
 - [x] Detokenizer routines (`PRINT_TOKENS`) to revert tokens back to text
 
 ## Phase 3: Program Memory Management
-- [ ] Initialize program memory as a Linked List (`PROG_INIT` with sentinel)
+- [x] Initialize program memory as a Linked List (`PROG_INIT` with sentinel)
 - [ ] Line finding algorithm (`LINE_FIND`)
 - [ ] Dynamic memory insertion/deletion: `MEM_OPEN_HOLE`, `MEM_CLOSE_HOLE`
 - [ ] Store new lines or replace existing ones: `LINE_STORE`
