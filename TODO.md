@@ -46,7 +46,7 @@
 - [x] `END` and `EXIT`: Halt execution cleanly
 - [x] `GOTO`: Unconditional jump by updating the line pointer
 - [x] `GOSUB` and `RETURN`: Subroutine calls using an internal call stack
-- [ ] `IF / THEN`: Conditional branching (THEN must be followed by a command)
+- [x] `IF / THEN`: Conditional branching (THEN must be followed by a command)
 
 ## Phase 8: Advanced Functions & Interactivity
 - [ ] `INPUT`: Pause execution, read from TTY, and assign to a variable (`INPUT VAR` or `INPUT "prompt"; VAR`)
