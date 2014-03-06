@@ -44,7 +44,7 @@
 ## Phase 7: Control Flow
 - [x] `RUN`: Traverse the linked list and dispatch tokens sequentially
 - [x] `END` and `EXIT`: Halt execution cleanly
-- [ ] `GOTO`: Unconditional jump by updating the line pointer
+- [x] `GOTO`: Unconditional jump by updating the line pointer
 - [ ] `GOSUB` and `RETURN`: Subroutine calls using an internal call stack
 - [ ] `IF / THEN`: Conditional branching (THEN must be followed by a command)
 
