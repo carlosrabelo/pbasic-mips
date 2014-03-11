@@ -1281,7 +1281,47 @@ MOD16_BY_ZERO:
 
 # Stub until EVAL_EXPR checkbox — parentheses recurse through here
 EVAL_EXPR:
-    j       EVAL_FACTOR
+    j       EVAL_TERM
+
+EVAL_TERM:
+    addiu   $sp, $sp, -16
+    sw      $ra, 12($sp)
+    sw      $s0, 8($sp)
+    jal     EVAL_FACTOR
+    addu    $s0, $v0, $zero
+ET_LOOP:
+    la      $t0, MEM_TOKEN_PTR
+    lw      $t0, 0($t0)
+    lbu     $t1, 0($t0)
+    addiu   $t2, $zero, 42
+    beq     $t1, $t2, ET_MUL
+    addiu   $t2, $zero, 47
+    beq     $t1, $t2, ET_DIV
+    addu    $v0, $s0, $zero
+    lw      $s0, 8($sp)
+    lw      $ra, 12($sp)
+    addiu   $sp, $sp, 16
+    jr      $ra
+ET_MUL:
+    addiu   $t0, $t0, 1
+    la      $t1, MEM_TOKEN_PTR
+    sw      $t0, 0($t1)
+    jal     EVAL_FACTOR
+    addu    $a0, $s0, $zero
+    addu    $a1, $v0, $zero
+    jal     MUL16
+    addu    $s0, $v0, $zero
+    j       ET_LOOP
+ET_DIV:
+    addiu   $t0, $t0, 1
+    la      $t1, MEM_TOKEN_PTR
+    sw      $t0, 0($t1)
+    jal     EVAL_FACTOR
+    addu    $a0, $s0, $zero
+    addu    $a1, $v0, $zero
+    jal     DIV16
+    addu    $s0, $v0, $zero
+    j       ET_LOOP
 
 EVAL_FACTOR:
     addiu   $sp, $sp, -24
