@@ -1258,3 +1258,23 @@ MUL16:
     mflo    $v0
     andi    $v0, $v0, 0xFFFF
     jr      $ra
+
+DIV16:
+    beq     $a1, $zero, DIV16_BY_ZERO
+    divu    $a0, $a1
+    mflo    $v0
+    andi    $v0, $v0, 0xFFFF
+    jr      $ra
+DIV16_BY_ZERO:
+    ori     $v0, $zero, 0xFFFF
+    jr      $ra
+
+MOD16:
+    beq     $a1, $zero, MOD16_BY_ZERO
+    divu    $a0, $a1
+    mfhi    $v0
+    andi    $v0, $v0, 0xFFFF
+    jr      $ra
+MOD16_BY_ZERO:
+    andi    $v0, $a0, 0xFFFF
+    jr      $ra
