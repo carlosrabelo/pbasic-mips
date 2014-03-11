@@ -1278,3 +1278,69 @@ MOD16:
 MOD16_BY_ZERO:
     andi    $v0, $a0, 0xFFFF
     jr      $ra
+
+# Stub until EVAL_EXPR checkbox — parentheses recurse through here
+EVAL_EXPR:
+    j       EVAL_FACTOR
+
+EVAL_FACTOR:
+    addiu   $sp, $sp, -24
+    sw      $ra, 20($sp)
+    sw      $s0, 16($sp)
+    sw      $s1, 12($sp)
+    la      $t0, MEM_TOKEN_PTR
+    lw      $s0, 0($t0)
+    lbu     $s1, 0($s0)
+    addiu   $t0, $zero, 192
+    bne     $s1, $t0, EF_NOT_NUM
+    lbu     $t1, 1($s0)
+    lbu     $t2, 2($s0)
+    sll     $t2, $t2, 8
+    or      $v0, $t1, $t2
+    addiu   $s0, $s0, 3
+    la      $t0, MEM_TOKEN_PTR
+    sw      $s0, 0($t0)
+    j       EF_DONE
+EF_NOT_NUM:
+    addiu   $t0, $zero, 208
+    slt     $t1, $s1, $t0
+    bne     $t1, $zero, EF_NOT_VAR
+    addiu   $t0, $zero, 234
+    slt     $t1, $s1, $t0
+    beq     $t1, $zero, EF_NOT_VAR
+    addu    $a0, $s1, $zero
+    jal     VAR_GET
+    addiu   $s0, $s0, 1
+    la      $t0, MEM_TOKEN_PTR
+    sw      $s0, 0($t0)
+    j       EF_DONE
+EF_NOT_VAR:
+    addiu   $t0, $zero, 40
+    bne     $s1, $t0, EF_NOT_PAREN
+    addiu   $s0, $s0, 1
+    la      $t0, MEM_TOKEN_PTR
+    sw      $s0, 0($t0)
+    jal     EVAL_EXPR
+    la      $t0, MEM_TOKEN_PTR
+    lw      $s0, 0($t0)
+    addiu   $s0, $s0, 1
+    sw      $s0, 0($t0)
+    j       EF_DONE
+EF_NOT_PAREN:
+    addiu   $t0, $zero, 45
+    bne     $s1, $t0, EF_ERR
+    addiu   $s0, $s0, 1
+    la      $t0, MEM_TOKEN_PTR
+    sw      $s0, 0($t0)
+    jal     EVAL_FACTOR
+    nor     $v0, $v0, $zero
+    addiu   $v0, $v0, 1
+    j       EF_DONE
+EF_ERR:
+    addu    $v0, $zero, $zero
+EF_DONE:
+    lw      $s1, 12($sp)
+    lw      $s0, 16($sp)
+    lw      $ra, 20($sp)
+    addiu   $sp, $sp, 24
+    jr      $ra
