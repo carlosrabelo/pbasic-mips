@@ -36,7 +36,7 @@
 ## Phase 6: Core Execution Engine
 - [x] Direct command jump table: `REPL_DISPATCH`
 - [x] `PRINT`: Output expressions, string literals, handling `,` (tabs) and `;` (no newline)
-- [ ] `LET`: Assign evaluated expressions to variables
+- [x] `LET`: Assign evaluated expressions to variables
 - [ ] `NEW`: Clear the program linked list and variables
 - [ ] `REM`: Ignore the remainder of the line
 - [ ] `FREE`: Available bytes between `MEM_PROG_END` and `MEM_PROG_LIMIT` (command or expression)
