@@ -1406,6 +1406,18 @@ EVAL_FACTOR:
     sw      $s0, 0($t0)
     j       EF_DONE
 EF_NOT_NUM:
+    addiu   $t0, $zero, 160
+    bne     $s1, $t0, EF_NOT_FREE
+    addiu   $s0, $s0, 1
+    la      $t0, MEM_TOKEN_PTR
+    sw      $s0, 0($t0)
+    la      $t0, MEM_PROG_LIMIT
+    lw      $t0, 0($t0)
+    la      $t1, MEM_PROG_END
+    lw      $t1, 0($t1)
+    subu    $v0, $t0, $t1
+    j       EF_DONE
+EF_NOT_FREE:
     addiu   $t0, $zero, 208
     slt     $t1, $s1, $t0
     bne     $t1, $zero, EF_NOT_VAR
@@ -1641,8 +1653,7 @@ DO_RUN:
 # DO_NEW is provided by the NEW command checkbox.
 DO_EXIT:
 # DO_REM is provided by the REM command checkbox.
-DO_FREE:
-    j       REPL
+# DO_FREE is provided by the FREE command checkbox.
 
 REPL_STORE_LINE:
     jal     LINE_STORE
@@ -1861,4 +1872,31 @@ DO_NEW:
 # Clobbers: None
 # -----------------------------------------------------------------------
 DO_REM:
+    j       REPL
+# cmd_free.asm - FREE command execution (MIPS)
+# -----------------------------------------------------------------------
+
+.text
+
+# -----------------------------------------------------------------------
+# DO_FREE - Calculates and prints the remaining free memory bytes
+# Input:  None
+# Output: None
+# Clobbers: None
+# -----------------------------------------------------------------------
+DO_FREE:
+    addiu   $sp, $sp, -4
+    sw      $ra, 0($sp)
+
+    la      $t0, MEM_PROG_LIMIT
+    lw      $t0, 0($t0)         # First byte after the 52 KB buffer
+    la      $t1, MEM_PROG_END
+    lw      $t1, 0($t1)         # Current program end
+    subu    $a0, $t0, $t1       # $a0 = free bytes
+    
+    jal     PRINT_NUMBER
+    jal     PRINT_CRLF
+
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 4
     j       REPL
