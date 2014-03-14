@@ -130,6 +130,9 @@ HALT_LOOP:
 # REPL - Read-Eval-Print Loop (prompt + read; tokenize/dispatch come later)
 # -----------------------------------------------------------------------
 REPL:
+    la      $t0, MEM_RUN_FLAG
+    lw      $t0, 0($t0)
+    bnez    $t0, RUN_NEXT
     la      $a0, STR_PROMPT
     jal     PRINT_STR
     jal     READ_LINE
@@ -1649,7 +1652,7 @@ DO_LIST:
     lw      $ra, 0($sp)
     addiu   $sp, $sp, 4
     j       REPL
-DO_RUN:
+# DO_RUN is provided by the RUN command checkbox.
 # DO_NEW is provided by the NEW command checkbox.
 DO_EXIT:
 # DO_REM is provided by the REM command checkbox.
@@ -1660,6 +1663,9 @@ REPL_STORE_LINE:
     j       REPL
 
 REPL_LOOP_DONE:
+    la      $t0, MEM_RUN_FLAG
+    lw      $t0, 0($t0)
+    bnez    $t0, RUN_NEXT
     j       REPL
 
 REPL_SYNTAX_ERROR:
@@ -1897,6 +1903,147 @@ DO_FREE:
     jal     PRINT_NUMBER
     jal     PRINT_CRLF
 
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 4
+    j       REPL
+
+# CHECK_BREAK - Check if a break key (Ctrl+C, ESC, q, Q) is pressed (non-blocking)
+# -----------------------------------------------------------------------
+# Output:
+#   $v0 = 1 if break requested, 0 otherwise
+# Clobbers:
+#   $t0, $t1, $v0
+# -----------------------------------------------------------------------
+CHECK_BREAK:
+    lui     $t0, 0xFFFF         # $t0 = 0xFFFF0000 (Keyboard Receiver Control Register)
+    lw      $t1, 0($t0)         # Read the control word from MMIO
+    andi    $t1, $t1, 1         # Check bit 0 (ready bit)
+    beq     $t1, $zero, CB_NONE # If ready bit is 0, no key has been pressed
+
+    lw      $t1, 4($t0)         # Read the ASCII code from Keyboard Receiver Data Register (0xFFFF0004)
+
+    # Compare character against the cancel keys
+    addiu   $v0, $zero, 81      # $v0 = 81 (ASCII for 'Q')
+    beq     $t1, $v0, CB_YES
+    addiu   $v0, $zero, 113     # $v0 = 113 (ASCII for 'q')
+    beq     $t1, $v0, CB_YES
+    addiu   $v0, $zero, 27      # $v0 = 27 (ASCII for ESC)
+    beq     $t1, $v0, CB_YES
+    addiu   $v0, $zero, 3       # $v0 = 3 (ASCII for Ctrl+C)
+    beq     $t1, $v0, CB_YES
+
+CB_NONE:
+    add     $v0, $zero, $zero   # Return 0 (no break)
+    jr      $ra                 # Return
+
+CB_YES:
+    addiu   $v0, $zero, 1       # Return 1 (break requested)
+    jr      $ra                 # Return
+
+# -----------------------------------------------------------------------
+
+# RUN_NEXT - Advance execution to the next program line
+# Input:  None
+# Output: None
+# Clobbers: $t0, $t1, $t2
+# -----------------------------------------------------------------------
+RUN_NEXT:
+    # Save the return address register because we are going to use 'jal'
+    addiu   $sp, $sp, -4
+    sw      $ra, 0($sp)
+
+    # Invoke non-blocking break key check
+    jal     CHECK_BREAK         # Returns $v0 = 1 if break key is pressed, 0 otherwise
+
+    # Restore the return address register
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 4
+
+    # If $v0 is zero, continue execution normally
+    beq     $v0, $zero, RN_CONTINUE
+
+    # Break requested! Turn off the execution state and return to interactive prompt
+    la      $t0, MEM_RUN_FLAG
+    sw      $zero, 0($t0)       # Clear execution flag
+    j       REPL                # Return straight to prompt
+
+RN_CONTINUE:
+    la      $t0, MEM_LINE_PTR
+    lw      $t0, 0($t0)         # $t0 = current line node address
+    lw      $t1, 0($t0)         # $t1 = next node address (next_ptr)
+
+    # Check if next node's next_ptr is null (sentinel node)
+    lw      $t2, 0($t1)         # $t2 = next_ptr of next node
+    beqz    $t2, RUN_END        # If null, end of program
+
+    # Update MEM_LINE_PTR to next node
+    la      $t0, MEM_LINE_PTR
+    sw      $t1, 0($t0)
+
+    # Set MEM_TOKEN_PTR to point to the tokens of the new node (node + 6)
+    addiu   $t1, $t1, 6
+    la      $t0, MEM_TOKEN_PTR
+    sw      $t1, 0($t0)
+
+    # Dispatch tokens
+    j       REPL_DISPATCH
+
+# -----------------------------------------------------------------------
+# RUN_END - Turn off execution mode and return to interactive REPL
+# Input:  None
+# Output: None
+# Clobbers: $t0
+# -----------------------------------------------------------------------
+RUN_END:
+    la      $t0, MEM_RUN_FLAG
+    sw      $zero, 0($t0)       # Clear execution flag
+    j       REPL                # Return to interactive prompt
+
+# cmd_run.asm - RUN command execution (MIPS)
+# -----------------------------------------------------------------------
+
+.text
+
+# -----------------------------------------------------------------------
+# DO_RUN - Begins execution of the stored BASIC program
+# Input:  None
+# Output: None
+# Clobbers: None
+# -----------------------------------------------------------------------
+DO_RUN:
+    addiu   $sp, $sp, -4
+    sw      $ra, 0($sp)
+
+    la      $t0, MEM_PROG_START
+    lw      $t1, 0($t0)         # Read next_ptr of first line node
+    beqz    $t1, RUN_NO_PROG    # If null, empty program
+
+    # Reset GOSUB stack pointer depth
+    la      $t0, MEM_GOSUB_SP
+    sw      $zero, 0($t0)
+
+    # Set run flag to 1
+    addiu   $t1, $zero, 1
+    la      $t0, MEM_RUN_FLAG
+    sw      $t1, 0($t0)
+
+    # Set MEM_LINE_PTR to MEM_PROG_START
+    la      $t0, MEM_PROG_START
+    la      $t1, MEM_LINE_PTR
+    sw      $t0, 0($t1)
+
+    # Set MEM_TOKEN_PTR to tokens of first line node (MEM_PROG_START + 6)
+    addiu   $t0, $t0, 6
+    la      $t1, MEM_TOKEN_PTR
+    sw      $t0, 0($t1)
+
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 4
+    j       REPL_DISPATCH
+
+RUN_NO_PROG:
+    la      $a0, MSG_NO_PROGRAM
+    jal     PRINT_STR
     lw      $ra, 0($sp)
     addiu   $sp, $sp, 4
     j       REPL
