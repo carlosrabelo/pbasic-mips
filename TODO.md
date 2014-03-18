@@ -51,7 +51,7 @@
 ## Phase 8: Advanced Functions & Interactivity
 - [x] `INPUT`: Pause execution, read from TTY, and assign to a variable (`INPUT VAR` or `INPUT "prompt"; VAR`)
 - [x] `RND(x)`: Linear congruential generator; returns 1..x (or a raw 16-bit value when x is 0)
-- [ ] `ABS(x)`: 16-bit two's-complement absolute value
+- [x] `ABS(x)`: 16-bit two's-complement absolute value
 
 ## Phase 9: Codebase Refactoring
 - [ ] Decompose monolithic files into modular structure by concern
