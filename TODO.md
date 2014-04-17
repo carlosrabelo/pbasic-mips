@@ -54,4 +54,4 @@
 - [x] `ABS(x)`: 16-bit two's-complement absolute value
 
 ## Phase 9: Codebase Refactoring
-- [ ] Decompose monolithic files into modular structure by concern
+- [x] Decompose monolithic files into modular structure by concern
